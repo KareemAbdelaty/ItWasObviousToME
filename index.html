@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>It Was Obvious to Me</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#11100e; --panel:#1b1a17; --panel2:#23211d; --ink:#f3efe6; --muted:#9b958a;
+  --faint:#6a655c; --line:#34312b; --green:#43c46e; --green-deep:#1f7a45;
+  --amber:#e8a13a; --red:#e0533f; --paper:#f3efe6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  font-family:'Space Mono',monospace;background:var(--bg);color:var(--ink);
+  -webkit-font-smoothing:antialiased;overflow:hidden;
+  background-image:radial-gradient(circle at 20% 0%,rgba(67,196,110,.07),transparent 45%),
+                   radial-gradient(circle at 90% 100%,rgba(224,83,63,.06),transparent 40%);
+}
+#app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;}
+.screen{width:100%;max-width:760px;max-height:100%;display:none;flex-direction:column;}
+.screen.active{display:flex;animation:fade .5s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.serif{font-family:'Fraunces',serif;}
+
+.kick{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--green);font-weight:700;}
+.btn{font-family:'Space Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.04em;background:var(--green);color:#08130c;border:none;border-radius:10px;padding:13px 26px;cursor:pointer;box-shadow:0 4px 0 var(--green-deep);transition:transform .08s,box-shadow .08s;}
+.btn:hover{transform:translateY(1px);box-shadow:0 3px 0 var(--green-deep);}
+.btn:active{transform:translateY(4px);box-shadow:0 0 0 var(--green-deep);}
+.btn.ghost{background:transparent;color:var(--muted);box-shadow:none;border:1px solid var(--line);}
+.btn.ghost:hover{color:var(--ink);border-color:var(--muted);transform:none;}
+.progress{display:flex;gap:6px;justify-content:center;margin-bottom:18px;}
+.pip{width:34px;height:4px;border-radius:2px;background:var(--line);transition:background .4s;}
+.pip.on{background:var(--green);}
+.pip.done{background:var(--green-deep);}
+
+#landing{text-align:center;}
+#landing .title{font-size:clamp(40px,9vw,76px);line-height:.95;font-weight:600;letter-spacing:-.02em;}
+#landing .title em{font-style:italic;color:var(--green);}
+#landing .sub{font-family:'Space Mono';color:var(--muted);font-size:14px;margin-top:18px;line-height:1.6;max-width:30em;margin-left:auto;margin-right:auto;}
+#landing .meta{margin-top:26px;font-size:11px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;}
+#landing .play{margin-top:30px;}
+.howto{margin-top:26px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:11.5px;color:var(--muted);}
+.howto span{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:6px 14px;}
+.deck{font-size:34px;letter-spacing:.3em;margin-bottom:6px;}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:34px 36px;position:relative;overflow:hidden;}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green);}
+.card.reflect::before{background:var(--amber);}
+.card .who{display:flex;align-items:center;gap:12px;margin-bottom:18px;}
+.avatar{width:42px;height:42px;border-radius:12px;flex:none;position:relative;}
+.avatar .head{position:absolute;width:14px;height:14px;border-radius:50%;background:#08130c;left:50%;top:9px;transform:translateX(-50%);}
+.avatar .body{position:absolute;width:24px;height:13px;border-radius:9px 9px 3px 3px;background:#08130c;left:50%;bottom:6px;transform:translateX(-50%);}
+.who .name{font-size:12px;font-weight:700;letter-spacing:.04em;}
+.who .role{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.12em;}
+.card h2{font-family:'Fraunces',serif;font-weight:500;font-size:27px;line-height:1.12;margin-bottom:14px;letter-spacing:-.01em;}
+.card h2 em{font-style:italic;color:var(--green);}
+.card.reflect h2 em{color:var(--amber);}
+.card p{font-size:13.5px;line-height:1.7;color:#d9d4ca;margin-bottom:12px;}
+.card .quote{font-family:'Fraunces',serif;font-style:italic;font-size:18px;line-height:1.4;color:var(--ink);border-left:2px solid var(--green-deep);padding-left:14px;margin:16px 0;}
+.cite{font-size:10.5px;color:var(--faint);line-height:1.5;margin-top:14px;border-top:1px solid var(--line);padding-top:12px;}
+.cite b{color:var(--muted);font-weight:700;}
+.card .actions{margin-top:22px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+
+.stage{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:26px;display:flex;flex-direction:column;align-items:center;position:relative;min-height:320px;justify-content:center;}
+.task{font-size:13px;color:var(--muted);text-align:center;margin-bottom:22px;letter-spacing:.02em;line-height:1.6;}
+.task b{color:var(--ink);}
+.hint{font-size:11px;color:var(--faint);margin-top:14px;text-align:center;min-height:14px;}
+.counter{position:absolute;top:14px;left:18px;font-size:10px;color:var(--faint);letter-spacing:.1em;text-transform:uppercase;}
+
+.clock{position:absolute;top:14px;right:18px;display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);letter-spacing:.06em;}
+.clock .face{width:9px;height:9px;border:1.5px solid var(--faint);border-radius:50%;position:relative;}
+.clock .face::after{content:"";position:absolute;width:1px;height:3px;background:var(--faint);left:50%;top:1.5px;transform-origin:bottom;transform:translateX(-50%);}
+
+.sink{display:flex;gap:48px;align-items:flex-end;margin-bottom:8px;}
+.faucet-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.water{width:120px;height:60px;border-radius:0 0 10px 10px;background:linear-gradient(180deg,#2a6cc4,#1b4f96);position:relative;overflow:hidden;border:1px solid #15396e;}
+.water .level{position:absolute;left:0;right:0;bottom:0;height:14%;background:linear-gradient(180deg,#5aa0e8,#2a6cc4);transition:height .45s;}
+.controls{display:flex;gap:34px;align-items:flex-end;}
+.ctl{display:flex;flex-direction:column;align-items:center;gap:9px;cursor:pointer;}
+.knob{width:84px;height:48px;border-radius:8px;background:linear-gradient(176deg,#3bb56e,#2a8a52 60%,#1f7344);box-shadow:0 4px 0 #155e36,inset 0 2px 2px rgba(255,255,255,.35);border:1px solid #1c7a45;display:flex;align-items:center;justify-content:center;transition:transform .08s,box-shadow .08s;}
+.ctl:hover .knob{transform:translateY(1px);box-shadow:0 3px 0 #155e36,inset 0 2px 2px rgba(255,255,255,.35);}
+.ctl:active .knob{transform:translateY(3px);box-shadow:0 1px 0 #155e36;}
+.knob svg{width:22px;height:22px;}
+.btn-ctl{width:84px;height:48px;border-radius:8px;border:1px solid rgba(0,0,0,.3);box-shadow:0 4px 0 rgba(0,0,0,.35),inset 0 2px 2px rgba(255,255,255,.3);transition:transform .08s,box-shadow .08s;}
+.ctl:hover .btn-ctl{transform:translateY(1px);}
+.ctl:active .btn-ctl{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35);}
+.btn-ctl.green{background:linear-gradient(176deg,#3bb56e,#2a8a52 60%,#1f7344);box-shadow:0 4px 0 #155e36,inset 0 2px 2px rgba(255,255,255,.35);}
+.btn-ctl.red{background:linear-gradient(176deg,#e3685a,#c8412f 60%,#a8311f);box-shadow:0 4px 0 #7e2417,inset 0 2px 2px rgba(255,255,255,.3);}
+.btn-ctl.amber{background:linear-gradient(176deg,#edb14e,#cf8a1a 60%,#a86f12);box-shadow:0 4px 0 #7e5210,inset 0 2px 2px rgba(255,255,255,.3);}
+.btn-ctl.blue{background:linear-gradient(176deg,#4f9be8,#2a6cc4 60%,#1f5296);box-shadow:0 4px 0 #163a6e,inset 0 2px 2px rgba(255,255,255,.3);}
+.led-h{width:44px;height:48px;border-radius:7px;background:linear-gradient(176deg,#2b2a26,#201f1b);border:1px solid #3a3832;display:flex;align-items:center;justify-content:center;}
+.led{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 38% 34%,#7af0a6,#33c46e 55%,#178a44);box-shadow:0 0 8px 2px rgba(51,196,110,.5);}
+.lbl{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;text-align:center;font-weight:700;}
+.lbl small{display:block;font-weight:400;color:var(--faint);letter-spacing:.04em;text-transform:none;margin-top:3px;font-size:8.5px;}
+
+.dev{width:210px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;text-align:center;}
+.dev .scr{background:#08130c;border-radius:8px;padding:14px;font-size:13px;color:var(--green);letter-spacing:.04em;border:1px solid #16331f;min-height:46px;display:flex;align-items:center;justify-content:center;}
+.bigbtn{margin-top:16px;width:100%;padding:16px;border-radius:10px;border:none;background:var(--amber);color:#1a1206;font-family:'Space Mono';font-weight:700;font-size:14px;letter-spacing:.05em;cursor:pointer;box-shadow:0 4px 0 #a06a16;user-select:none;}
+.bigbtn:active{transform:translateY(3px);box-shadow:0 1px 0 #a06a16;}
+.bigbtn.busy{background:#3a8a57;color:#eafff0;box-shadow:0 4px 0 #1f5e38;}
+.choices{display:flex;flex-direction:column;gap:10px;width:100%;max-width:320px;}
+.choice{padding:13px 16px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-family:'Space Mono';font-size:13px;cursor:pointer;text-align:left;transition:border-color .15s,background .15s;}
+.choice:hover{border-color:var(--green);background:#1f241f;}
+
+.steplist{display:flex;flex-direction:column;gap:8px;width:100%;max-width:360px;margin-bottom:6px;}
+.instr{background:#08130c;border:1px solid #16331f;border-radius:10px;padding:14px 16px;max-width:420px;width:100%;text-align:center;font-size:13.5px;color:var(--green);line-height:1.55;margin-bottom:18px;letter-spacing:.02em;}
+.instr .lead{display:block;font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.14em;margin-bottom:6px;}
+.ilist{text-align:left;display:flex;flex-direction:column;gap:5px;margin-top:4px;}
+.istep{font-size:12px;color:#cfeede;letter-spacing:.01em;padding:3px 0;transition:opacity .25s,color .25s;}
+.istep-done{color:var(--green-deep);text-decoration:line-through;opacity:.6;}
+.instr b{color:#aef0c4;}
+.bench{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;max-width:440px;}
+.act{font-family:'Space Mono';font-weight:700;font-size:12.5px;letter-spacing:.03em;padding:13px 18px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:8px;transition:border-color .15s,background .15s,transform .08s;}
+.act:hover{border-color:var(--green);background:#1f241f;}
+.act:active{transform:translateY(2px);}
+.act .ic{font-size:15px;}
+.act.done{opacity:.4;pointer-events:none;border-color:var(--green-deep);}
+.act.live{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber);}
+.circuit{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:11px;color:var(--muted);}
+.bulb{width:30px;height:30px;border-radius:50%;background:#2a2a26;border:1px solid #3a3832;transition:background .25s,box-shadow .25s;}
+.bulb.on{background:radial-gradient(circle at 40% 35%,#ffe9a8,#e8a13a);box-shadow:0 0 14px 3px rgba(232,161,58,.6);}
+.pwr{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--line);color:var(--faint);}
+.pwr.on{color:var(--amber);border-color:var(--amber);}
+.stepopt{display:flex;align-items:center;gap:11px;padding:12px 15px;border:1px solid var(--line);border-radius:9px;background:var(--panel);cursor:pointer;transition:border-color .15s,background .15s;}
+.stepopt:hover{border-color:var(--green);}
+.stepopt.sel{border-color:var(--green);background:#1f241f;}
+.stepopt .box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--faint);flex:none;display:flex;align-items:center;justify-content:center;font-size:12px;color:#08130c;}
+.stepopt.sel .box{background:var(--green);border-color:var(--green);}
+.stepopt .txt{font-size:12.5px;}
+
+.flash{position:fixed;inset:0;pointer-events:none;opacity:0;z-index:50;}
+.flash.red{background:radial-gradient(circle,rgba(224,83,63,0),rgba(224,83,63,.55));animation:flashfx .7s ease;}
+.flash.good{background:radial-gradient(circle,rgba(67,196,110,0),rgba(67,196,110,.4));animation:flashfx .7s ease;}
+@keyframes flashfx{0%{opacity:0;}30%{opacity:1;}100%{opacity:0;}}
+.shake{animation:shk .4s;}
+@keyframes shk{0%,100%{transform:translateX(0);}20%{transform:translateX(-9px);}40%{transform:translateX(8px);}60%{transform:translateX(-6px);}80%{transform:translateX(4px);}}
+.ok-pop{animation:okpop .5s ease;}
+@keyframes okpop{0%{transform:scale(1);}40%{transform:scale(1.04);}100%{transform:scale(1);}}
+
+.outcome{text-align:center;}
+.outcome .big{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin-bottom:8px;}
+.outcome .big.bad{color:var(--red);}
+.outcome .big.ok{color:var(--green);}
+.outcome p{font-size:13px;color:var(--muted);line-height:1.6;max-width:30em;margin:0 auto 8px;}
+
+.endwrap{text-align:center;}
+.endwrap h2{font-family:'Fraunces',serif;font-size:clamp(30px,6vw,46px);font-weight:600;letter-spacing:-.01em;line-height:1.05;margin-bottom:14px;}
+.endwrap h2 em{font-style:italic;color:var(--green);}
+.endwrap .body{font-size:13.5px;color:#d9d4ca;line-height:1.7;max-width:34em;margin:0 auto 10px;text-align:left;}
+.reflist{margin-top:22px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px;}
+.reflist h3{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);margin-bottom:14px;}
+.refrow{font-size:10.8px;color:var(--muted);line-height:1.55;padding:7px 0;border-bottom:1px solid var(--line);}
+.refrow:last-child{border-bottom:none;}
+.refrow b{color:var(--ink);}
+.refrow .n{color:var(--green);font-weight:700;}
+.disc{font-size:10px;color:var(--faint);line-height:1.5;margin-top:16px;max-width:40em;margin-left:auto;margin-right:auto;}
+
+.scroller{overflow-y:auto;max-height:100%;padding:4px;}
+.scroller::-webkit-scrollbar{width:8px;}
+.scroller::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+.center{display:flex;justify-content:center;}
+.footer-note{text-align:center;font-size:10px;color:var(--faint);margin-top:16px;letter-spacing:.08em;}
+.takeaways{margin:0 0 12px;padding-left:18px;list-style:none;}
+.takeaways li{position:relative;font-size:13.5px;line-height:1.6;color:#d9d4ca;margin-bottom:7px;padding-left:4px;}
+.takeaways li::before{content:"\2014";position:absolute;left:-18px;color:var(--green);}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div id="app">
+
+<section class="screen active" id="landing">
+  <div class="deck">&#9638; &#9638; &#9638;</div>
+  <div class="kick">ENGG 513 &middot; Reflection on Engineering Ethics &middot; A playable case study</div>
+  <h1 class="title serif">It Was<br>Obvious <em>to Me</em></h1>
+  <div class="sub">Engineers sit far from the consequences of their work. A doctor sees the patient; we ship the device and rarely watch anyone use it. Three short tasks. You play the person on the other end. Do your best.</div>
+  <div class="howto"><span>&#9201; ~5 minutes</span><span>&#128433; click / tap to play</span><span>&#8635; levels can be replayed</span></div>
+  <div class="play"><button class="btn" onclick="go('intro')">Begin</button></div>
+  <div class="meta">Kareem Abdelaty &middot; UCID 30075331</div>
+</section>
+
+<section class="screen" id="intro">
+  <div class="progress"><span class="pip"></span><span class="pip"></span><span class="pip"></span></div>
+  <div class="card scroller">
+    <div class="who">
+      <div class="avatar" style="background:var(--green-deep)"><span class="head"></span><span class="body"></span></div>
+      <div><div class="name">HOW TO PLAY</div><div class="role">read this, then play</div></div>
+    </div>
+    <h2>Why a <em>game</em>.</h2>
+    <p>Each level is a short fictional scenario inspired by something that happened to me at work, with the real story right after. The aim is to make the lesson land harder by putting you, briefly, in the position of the person on the receiving end of an engineering decision.</p>
+    <p>I made this a game partly because of <span class="name">Dumb Ways to Die</span>, and partly because about ten years ago I worked for a company that gamified high-school subjects. In my experience, and I do believe this, gamification helps a person internalise a lesson far faster than plain reading. So the hope is that living these moments, rather than reading about them, makes them stick, for you and for me.</p>
+    <div class="actions"><button class="btn" onclick="startL1()">Start the shift</button></div>
+  </div>
+</section>
+
+<section class="screen" id="l1play">
+  <div class="progress"><span class="pip on"></span><span class="pip"></span><span class="pip"></span></div>
+  <div class="stage" id="l1stage">
+    <div class="counter" id="l1counter">TASK 1</div>
+    <div class="task" id="l1task"></div>
+    <div class="sink">
+      <div class="faucet-wrap">
+        <svg width="120" height="70" viewBox="0 0 120 70">
+          <rect x="52" y="0" width="16" height="30" rx="3" fill="#6a655c"/>
+          <rect x="20" y="26" width="80" height="12" rx="6" fill="#857f74"/>
+          <rect x="20" y="34" width="12" height="22" rx="3" fill="#6a655c"/>
+          <rect id="drip" x="24" y="56" width="4" height="9" rx="2" fill="#5aa0e8"/>
+        </svg>
+        <div class="water"><div class="level" id="waterlevel"></div></div>
+      </div>
+      <div class="controls" id="l1controls"></div>
+    </div>
+    <div class="hint" id="l1hint"></div>
+  </div>
+</section>
+
+<section class="screen" id="l1out">
+  <div class="progress"><span class="pip on"></span><span class="pip"></span><span class="pip"></span></div>
+  <div class="card reflect scroller">
+    <div class="who">
+      <div class="avatar" style="background:#2a6cc4"><span class="head"></span><span class="body"></span></div>
+      <div><div class="name">WHAT THAT WAS</div><div class="role">Design for Intent vs Actual Use</div></div>
+    </div>
+    <div id="l1outcome"></div>
+    <p>This level was inspired by a real usability test I ran on a medical device. It had a large button you pressed to act and a small indicator light that only reported status. During the session, a participant who was asked to press the button reached for the indicator light instead. The two were not really as confusing as I made them here; I exaggerated that to make the point clearer. To me, the person who designed it, they were obviously different things. To a first-time user, under a bit of pressure, they were both just green features on a panel.</p>
+    <p>This is what the course calls <b>design for intent versus actual use</b>: I designed each control with a clear intent, but a user does not always act on that intent, and the gap is a foreseeable use error. The way you catch it is by watching real use rather than trusting your own sense of what is clear. You cannot anticipate every mistake at the desk; you find them by putting the design in front of the people who will actually hold it.</p>
+    <div class="cite"><b>[1]</b> R. Razak, "Unintended consequences in design," UX Collective, 2019. &nbsp;<b>[2]</b> U.S. FDA, Applying Human Factors and Usability Engineering to Medical Devices, 2016 &mdash; many use errors cannot be anticipated until real use is observed.</div>
+    <div class="actions"><button class="btn" onclick="startL2()">Next task</button><button class="btn ghost" onclick="startL1()">Replay</button></div>
+  </div>
+</section>
+
+<section class="screen" id="l2play">
+  <div class="progress"><span class="pip done"></span><span class="pip on"></span><span class="pip"></span></div>
+  <div class="stage" id="l2stage">
+    <div class="counter" id="l2counter">TASK 1</div>
+    <div class="clock"><span class="face"></span><span id="l2clock">00:00</span></div>
+    <div class="task" id="l2task"></div>
+    <div class="dev">
+      <div class="scr" id="l2scr">READY</div>
+      <button class="bigbtn" id="l2btn">HOLD TO APPLY</button>
+    </div>
+    <div class="hint" id="l2hint"></div>
+  </div>
+</section>
+
+<section class="screen" id="l2quiz">
+  <div class="progress"><span class="pip done"></span><span class="pip on"></span><span class="pip"></span></div>
+  <div class="stage">
+    <div class="who" style="margin-bottom:18px;">
+      <div class="avatar" style="background:var(--red)"><span class="head"></span><span class="body"></span></div>
+      <div><div class="name">THE MEDIC</div><div class="role">arriving on scene</div></div>
+    </div>
+    <div class="task" style="font-size:15px;"><b>"What time did you apply it?"</b><br>They need the clock time you started. What do you tell them?</div>
+    <div class="choices" id="l2choices"></div>
+    <div class="hint" id="l2qhint">You were never told to track this.</div>
+  </div>
+</section>
+
+<section class="screen" id="l2out">
+  <div class="progress"><span class="pip done"></span><span class="pip on"></span><span class="pip"></span></div>
+  <div class="card reflect scroller">
+    <div class="who">
+      <div class="avatar" style="background:var(--amber)"><span class="head"></span><span class="body"></span></div>
+      <div><div class="name">WHAT THAT WAS</div><div class="role">Value-Based Engineering</div></div>
+    </div>
+	<div id="l2outcome"></div>
+    <p>This level also came from a medical device project. I joined as a designer after the initial design phase was done. The device worked and met every requirement in our requirements document. But while testing it, I realized it did not record how much time had passed since it was activated. Nobody had dropped that requirement; nobody had thought of it, so it was never written down. And the elapsed time was medically relevant. The closest example I can point to is a tourniquet: by the time it comes off, the tissue past it may already have gone too long without blood, so whoever takes over needs to know how long it has been on. My device was different, but the principle was the same, the elapsed time was something a person downstream would depend on, and it was not being captured.</p>
+    <p>Here was the hard part. I was already behind on the work for the next phase, and raising this meant flagging it, arguing for it, and folding in the change, which would put me further behind. It would have been easier to say nothing. I raised it anyway, with the technical lead and the project manager. Only then did it become a requirement, and we added the time recording. This is what the course covered as <b>Value-Based Engineering</b>: the idea that the values you care about, here, safe downstream care for a patient, only protect anyone once they are translated into an actual engineering requirement. The value was never in dispute; the gap was that nobody had turned it into something the system was built to do until I named it.</p>
+    <div class="cite"><b>[3]</b> J. B. Holcomb, F. K. Butler, P. Rhee, "Hemorrhage control devices: Tourniquets and hemostatic dressings," J. Spec. Oper. Med., 2015 &mdash; record the time a tourniquet goes on, because it matters to whoever takes over care. &nbsp;<b>[4]</b> S. Spiekermann and T. Winkler, "Value-Based Engineering With IEEE 7000," IEEE Technology and Society Magazine, 2022.</div>
+    <div class="actions"><button class="btn" onclick="startL3()">Next task</button><button class="btn ghost" onclick="startL2()">Replay</button></div>
+  </div>
+</section>
+
+<section class="screen" id="l3play">
+  <div class="progress"><span class="pip done"></span><span class="pip done"></span><span class="pip on"></span></div>
+  <div class="stage" id="l3stage">
+    <div class="counter" id="l3counter">Cleared 0 / 4</div>
+    <div class="who" style="margin-bottom:14px;">
+      <div class="avatar" style="background:var(--green-deep)"><span class="head"></span><span class="body"></span></div>
+      <div><div class="name">KAREEM (over radio)</div><div class="role">the engineer · giving you instructions</div></div>
+    </div>
+    <div class="instr" id="l3instr"></div>
+    <div class="bench" id="l3bench"></div>
+    <div class="hint" id="l3hint"></div>
+  </div>
+</section>
+
+<section class="screen" id="l3out">
+  <div class="progress"><span class="pip done"></span><span class="pip done"></span><span class="pip on"></span></div>
+  <div class="card reflect scroller">
+    <div class="who">
+      <div class="avatar" style="background:#8a7fc4"><span class="head"></span><span class="body"></span></div>
+      <div><div class="name">WHAT THAT WAS</div><div class="role">Professional accountability</div></div>
+    </div>
+    <div id="l3outcome"></div>
+    <p>Thankfully the real story behind this was much lower risk than a live bench. But one of the things I have learned in engineering is that you have to be precise with instructions, because people follow them as written, not as you pictured them. Here the checklist said power on, confirm the indicator, replace the fuse, and never said power off first, so following it exactly put your hand on something live. I dramatised the danger to make it land. I build test tools other people use, and the setup is so automatic in my head that I forget to say the obvious step, and someone else is the one who loses time, or worse, for my leaving it out.</p>
+    <p>When a user makes an understandable mistake while following instructions I wrote, the first thing I need to ask is whether the tool or the instructions failed to make something clear, before assuming the person was careless. That is what <b>professional accountability</b> means to me here. APEGA frames protecting public safety as a duty that holds regardless of schedule or convenience. Most days that duty is small and quiet: write down the step that is obvious to you, so it is obvious to them too.</p>
+    <div class="cite"><b>[5]</b> N. G. Leveson, Engineering a Safer World: Systems Thinking Applied to Safety, MIT Press, 2012. &nbsp;<b>[6]</b> APEGA, Code of Ethics: Five Rules of Conduct Reference Guide, 2023.</div>
+    <div class="actions"><button class="btn" onclick="go('end')">See the whole picture</button><button class="btn ghost" onclick="startL3()">Replay</button></div>
+  </div>
+</section>
+
+<section class="screen" id="end">
+  <div class="progress"><span class="pip done"></span><span class="pip done"></span><span class="pip done"></span></div>
+  <div class="scroller endwrap">
+    <div class="kick" style="margin-bottom:14px;">In hindsight, and going forward</div>
+    <h2 class="serif">Thinking like the <em>end user</em>.</h2>
+    <div class="body">
+      <p style="margin-bottom:12px;">Thanks for playing. I hope it was useful, and that putting you in the user's position for a few minutes makes the habit easier to keep: stopping to ask how the person on the other end will actually read a design, not just whether it works the way I intended.</p>
+      <p style="margin-bottom:12px;">Across the three levels, the lessons I am trying to internalize, and hope you take something from too, are:</p>
+      <ul class="takeaways">
+        <li>watch how people really use a design, instead of trusting that it is obvious because it is obvious to me;</li>
+        <li>ask what the requirements quietly left out, not just whether the written ones are met;</li>
+        <li>raise a safety concern even when it is inconvenient or puts me behind;</li>
+        <li>be precise with instructions, because people follow what I actually say, not what I pictured;</li>
+        <li>look at the whole system, so I notice a small problem early enough to act on it.</li>
+      </ul>
+      <p>None of this replaces getting the engineering right. It sits on top of it. Technical correctness is still the centre of the work; I just no longer think it is the whole of it.</p>
+    </div>
+    <div class="reflist">
+      <h3>Course topics &middot; sources</h3>
+      <div class="refrow"><span class="n">Level 1</span> &middot; <b>Design for Intent vs Actual Use</b> &mdash; foreseeable use error; observing real use. [1] Razak, UX Collective, 2019. [2] U.S. FDA, Human Factors &amp; Usability Engineering to Medical Devices, 2016.</div>
+      <div class="refrow"><span class="n">Level 2</span> &middot; <b>Value-Based Engineering</b> &mdash; turning the value of safe downstream care into an actual requirement. [3] Holcomb, Butler &amp; Rhee, J. Spec. Oper. Med., 2015. [4] Spiekermann &amp; Winkler, IEEE Technology and Society Magazine, 2022.</div>
+      <div class="refrow"><span class="n">Level 3</span> &middot; <b>Professional Accountability</b> &mdash; asking first whether the instruction was unclear. [6] APEGA, Five Rules of Conduct Reference Guide, 2023.</div>
+      <div class="refrow"><span class="n">Throughout</span> &middot; <b>Complex Systems &amp; Early Detection</b> &mdash; small details inside a larger safety system. [5] Leveson, Engineering a Safer World, MIT Press, 2012.</div>
+      <div class="refrow" style="opacity:.85;"><span class="n">Medium &amp; framing</span> &middot; not course topics. [7] E. Moreau, "Dumb Ways to Die &mdash; the effectiveness of a serious game," 2023, on the Metro Trains rail-safety campaign and its reported ~20% near-miss drop. [8] R. Crane, "Malpractice and Accountability in Engineering &mdash; A Surgeon's Take," The Strong Towns Podcast, 2022, on how engineers sit far from the people affected by their work.</div>
+    </div>
+    <div class="disc"><b>AI use:</b> Claude (Anthropic) was used to help write the HTML, CSS, and JavaScript for this game and to assist with layout and wording. The professional experiences, the ethical analysis, the choice of topics, and the conclusions are my own.</div>
+    <div class="actions center" style="margin-top:22px;"><button class="btn" onclick="go('landing')">&#8635; Play again</button></div>
+    <div class="footer-note">ENGG 513 &middot; Kareem Abdelaty &middot; UCID 30075331</div>
+  </div>
+</section>
+
+</div>
+
+<script>
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  var sc=document.querySelector('#'+id+' .scroller'); if(sc) sc.scrollTop=0;
+}
+function flash(kind){var f=document.getElementById('flash');f.className='flash '+kind;void f.offsetWidth;setTimeout(function(){f.className='flash';},700);}
+function shake(el){el.classList.add('shake');setTimeout(function(){el.classList.remove('shake');},420);}
+function pop(el){if(!el)return;el.classList.add('ok-pop');setTimeout(function(){el.classList.remove('ok-pop');},500);}
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+/* ===== LEVEL 1 ===== */
+var l1_warmups, l1_done, l1_timer;
+var L1_PANELS=[
+  /* each warm-up shows a few controls; exactly one is the green one to press */
+  [{c:'red',type:'btn'},{c:'green',type:'btn'},{c:'amber',type:'btn'}],
+  [{c:'amber',type:'btn'},{c:'blue',type:'btn'},{c:'green',type:'btn'}],
+  [{c:'green',type:'btn'},{c:'red',type:'btn'}],
+  [{c:'blue',type:'btn'},{c:'green',type:'btn'},{c:'red',type:'btn'},{c:'amber',type:'btn'}]
+];
+function startL1(){
+  go('l1play');
+  l1_warmups=randInt(2,4); l1_done=0;
+  document.getElementById('waterlevel').style.height='14%';
+  document.getElementById('l1hint').textContent='';
+  l1Round();
+}
+function l1Round(){
+  var controls=document.getElementById('l1controls');
+  var task=document.getElementById('l1task');
+  var counter=document.getElementById('l1counter');
+  var hint=document.getElementById('l1hint');
+  document.getElementById('waterlevel').style.height='14%';
+  var finalRound=(l1_done>=l1_warmups);
+  counter.textContent='Cleared '+l1_done+' / '+(l1_warmups+1);
+  controls.innerHTML=''; hint.textContent='';
+  if(!finalRound){
+    // WARM-UP: several buttons of different colours; only one is green. "Press the green button" is easy.
+    task.innerHTML='<b>Shut the valve.</b> Press the <b>green</b> button.';
+    var panel=L1_PANELS[l1_done%L1_PANELS.length].slice().sort(function(){return Math.random()-0.5;});
+    panel.forEach(function(p){
+      var d=document.createElement('div'); d.className='ctl';
+      d.innerHTML='<div class="btn-ctl '+p.c+'"></div>';
+      d.onclick=function(){
+        if(p.c==='green'){ pop(d.querySelector('.btn-ctl')); l1_done++; document.getElementById('waterlevel').style.height='6%'; setTimeout(l1Round,360); }
+        else { shake(d.querySelector('.btn-ctl')); hint.textContent='Not that one. Press the green button.'; }
+      };
+      controls.appendChild(d);
+    });
+  } else {
+    // TRAP: one green BUTTON and one green LED, both unlabeled, both green. Instruction: "press the green button".
+    // The LED only reports status; pressing it does nothing. The working control is the button, but they read the same at a glance.
+    task.innerHTML='<b>Water\'s rising. Shut the valve.</b> Press the green button.';
+    hint.textContent='';
+    var picked=false;
+    var realIsLeft=Math.random()<0.5;
+    function mkBtn(){var d=document.createElement('div');d.className='ctl';d.innerHTML='<div class="btn-ctl green"></div>';
+      d.onclick=function(){ if(picked||document.getElementById('l1out').classList.contains('active'))return; picked=true; clearInterval(l1_timer); l1Resolve(true,'btn'); }; return d;}
+    function mkLed(){var d=document.createElement('div');d.className='ctl';d.innerHTML='<div class="led-h"><span class="led"></span></div>';
+      d.onclick=function(){ if(picked||document.getElementById('l1out').classList.contains('active'))return; picked=true; clearInterval(l1_timer); l1Resolve(false,'led'); }; return d;}
+    // Most players read the glowing round LED as "the green button" and press it. Either way we show the reflection.
+    if(realIsLeft){controls.appendChild(mkBtn());controls.appendChild(mkLed());}
+    else{controls.appendChild(mkLed());controls.appendChild(mkBtn());}
+    var h=14; clearInterval(l1_timer);
+    l1_timer=setInterval(function(){h=Math.min(88,h+7);document.getElementById('waterlevel').style.height=h+'%';
+      if(h>=88){clearInterval(l1_timer);l1Resolve(false,'timeout');}},620);
+  }
+}
+function l1Resolve(correct,type){
+  clearInterval(l1_timer);
+  var out=document.getElementById('l1outcome');
+  if(type==='btn'){
+    flash('good'); document.getElementById('waterlevel').style.height='6%';
+    out.innerHTML='<div class="outcome"><div class="big ok">Right one.</div><p>You found the button. But the round glowing light next to it was tempting, and plenty of people reach for that instead.</p></div>';
+  } else {
+    flash('red'); shake(document.getElementById('l1stage')); document.getElementById('waterlevel').style.height='100%';
+    var why=(type==='timeout')?'You hesitated. Two green things, no clear difference.':'You pressed the green status light. It only reports; it does nothing. The water kept rising.';
+    out.innerHTML='<div class="outcome"><div class="big bad">Flooded.</div><p>'+why+'</p></div>';
+  }
+  setTimeout(function(){go('l1out');},760);
+}
+
+/* ===== LEVEL 2 ===== */
+var l2_warmups,l2_done,l2_min,l2_tick,l2_applyTime,l2_applied,l2_busy;
+function startL2(){
+  go('l2play');
+  l2_warmups=randInt(2,4); l2_done=0;
+  l2_min=randInt(13*60,21*60+30); l2_applied=false; l2_busy=false; l2_applyTime=null;
+  renderClock(); clearInterval(l2_tick);
+  l2_tick=setInterval(function(){l2_min=(l2_min+1)%(24*60);renderClock();},1500);
+  l2Round();
+}
+function renderClock(){var h=String(Math.floor(l2_min/60)).padStart(2,'0');var m=String(l2_min%60).padStart(2,'0');document.getElementById('l2clock').textContent=h+':'+m;}
+function clockStr(){var h=String(Math.floor(l2_min/60)).padStart(2,'0');var m=String(l2_min%60).padStart(2,'0');return h+':'+m;}
+function l2Round(){
+  var finalRound=(l2_done>=l2_warmups);
+  var scr=document.getElementById('l2scr'), btn=document.getElementById('l2btn'), task=document.getElementById('l2task');
+  document.getElementById('l2counter').textContent='Cleared '+l2_done+' / '+(l2_warmups+1);
+  scr.textContent='READY'; scr.style.color='var(--green)'; btn.classList.remove('busy');
+  document.getElementById('l2hint').textContent=''; l2_applied=false; l2_busy=false;
+  if(!finalRound){
+    var labels=['Run self-test','Calibrate sensor','Clear log','Sync settings','Prime line'];
+    var lbl=labels[l2_done%labels.length];
+    task.innerHTML='<b>'+lbl+'.</b> Press and hold the button until it finishes.';
+    btn.textContent='HOLD TO RUN';
+    wireHold(btn,scr,function(){scr.textContent='DONE';pop(document.querySelector('.dev'));l2_done++;setTimeout(l2Round,650);},'WORKING');
+  } else {
+    task.innerHTML='<b>Apply the device.</b> Press and hold until it reads APPLIED.';
+    btn.textContent='HOLD TO APPLY';
+    wireHold(btn,scr,function(){
+      l2_applyTime=clockStr(); scr.textContent='APPLIED'; scr.style.color='var(--amber)';
+      task.innerHTML='<b>Done.</b> The device is applied. Hold position.';
+      document.getElementById('l2hint').textContent='&hellip;now wait.';
+      setTimeout(l2ToQuiz,1600);
+    },'APPLYING');
+  }
+}
+function wireHold(btn,scr,onDone,word){
+  var t=null;
+  function start(){ if(l2_busy||l2_applied)return; l2_busy=true; btn.classList.add('busy'); var p=0;
+    t=setInterval(function(){p+=5;scr.textContent=word+' '+Math.min(100,p)+'%';
+      if(p>=100){clearInterval(t);l2_busy=false;l2_applied=true;onDone();}},42); }
+  function end(){ if(l2_applied)return; clearInterval(t); l2_busy=false; btn.classList.remove('busy'); scr.textContent='READY'; }
+  btn.onmousedown=start; btn.onmouseup=end; btn.onmouseleave=end;
+  btn.ontouchstart=function(e){e.preventDefault();start();}; btn.ontouchend=function(e){e.preventDefault();end();};
+}
+function l2ToQuiz(){
+  clearInterval(l2_tick);
+  var correct=l2_applyTime;
+  var base=parseInt(correct.slice(0,2))*60+parseInt(correct.slice(3));
+  var opts={}; opts[correct]=1;
+  while(Object.keys(opts).length<4){var sgn=randInt(0,1)?1:-1;var d=base+sgn*randInt(2,40);var dd=((d%(24*60))+24*60)%(24*60);var s=String(Math.floor(dd/60)).padStart(2,'0')+':'+String(dd%60).padStart(2,'0');opts[s]=1;}
+  var arr=Object.keys(opts).sort(function(){return Math.random()-0.5;});
+  var box=document.getElementById('l2choices'); box.innerHTML='';
+  arr.forEach(function(v){var b=document.createElement('button');b.className='choice';b.textContent=v;b.onclick=function(){l2Resolve(v===correct,correct);};box.appendChild(b);});
+  var idk=document.createElement('button'); idk.className='choice'; idk.textContent="I didn't note it - I'm not sure"; idk.onclick=function(){l2Resolve(false,correct);}; box.appendChild(idk);
+  go('l2quiz');
+}
+function l2Resolve(correct,answer){
+  var out=document.getElementById('l2outcome');
+  if(correct){
+    flash('good');
+    out.innerHTML='<div class="outcome"><div class="big ok">Lucky guess.</div><p>You were right, but you were guessing. Nothing told you to read the clock.</p></div>';
+  } else {
+    flash('red');
+    out.innerHTML='<div class="outcome"><div class="big bad">Wrong time.</div><p>It was applied at <b>'+answer+'</b>. You weren\'t watching the clock, because nothing told you to.</p></div>';
+  }
+  setTimeout(function(){go('l2out');},760);
+}
+
+/* ===== LEVEL 3 : you are the technician ===== */
+var l3_warmups,l3_done,l3_round,l3_state;
+/* Warm-up tasks: a clear ordered instruction you carry out by clicking actions in the right order. */
+var L3_WARM=[
+  {radio:'Connect the meter, set the dial to volts, then read the display.',
+   acts:[{id:'meter',ic:'\u2295',txt:'Connect the meter'},{id:'dial',ic:'\u25C9',txt:'Set dial to volts'},{id:'read',ic:'\u25CE',txt:'Read the display'}],
+   order:['meter','dial','read']},
+  {radio:'Clip the ground lead, then press test, then log the result.',
+   acts:[{id:'ground',ic:'\u23DA',txt:'Clip ground lead'},{id:'test',ic:'\u25B6',txt:'Press test'},{id:'log',ic:'\u270E',txt:'Log result'}],
+   order:['ground','test','log']},
+  {radio:'Open the panel, seat the board, then close the panel.',
+   acts:[{id:'open',ic:'\u25A1',txt:'Open the panel'},{id:'seat',ic:'\u25AE',txt:'Seat the board'},{id:'close',ic:'\u25A0',txt:'Close the panel'}],
+   order:['open','seat','close']}
+];
+function startL3(){ go('l3play'); l3_warmups=randInt(2,4); l3_done=0; l3Round(); }
+function l3Round(){
+  document.getElementById('l3counter').textContent='Cleared '+l3_done+' / '+(l3_warmups+1);
+  document.getElementById('l3hint').textContent='';
+  var finalRound=(l3_done>=l3_warmups);
+  var instr=document.getElementById('l3instr');
+  var bench=document.getElementById('l3bench');
+  bench.innerHTML='';
+  if(!finalRound){
+    var t=L3_WARM[l3_done%L3_WARM.length];
+    l3_state={mode:'warm', order:t.order, step:0};
+    instr.innerHTML='<span class="lead">Kareem says</span>'+t.radio;
+    t.acts.slice().sort(function(){return Math.random()-0.5;}).forEach(function(a){
+      var b=document.createElement('button'); b.className='act'; b.dataset.id=a.id;
+      b.innerHTML='<span class="ic">'+a.ic+'</span>'+a.txt;
+      b.onclick=function(){ l3WarmClick(a.id, b); };
+      bench.appendChild(b);
+    });
+  } else {
+    // FAIL round: a numbered instruction list. The missing "power off" is buried mid-sequence.
+    l3_state={mode:'live', powered:false, indicatorHigh:false, fuseReplaced:false, step:0,
+      order:['power','confirm','fuse','reading']};
+    instr.innerHTML='<span class="lead">Kareem says &middot; follow in order</span>'
+      +'<div class="ilist">'
+      +'<div class="istep" id="is-power">1 &nbsp;Switch the bench power on</div>'
+      +'<div class="istep" id="is-confirm">2 &nbsp;Confirm the power indicator goes high</div>'
+      +'<div class="istep" id="is-fuse">3 &nbsp;Replace the blown fuse</div>'
+      +'<div class="istep" id="is-reading">4 &nbsp;Confirm the bench reads ready</div>'
+      +'</div>';
+    var circuit=document.createElement('div'); circuit.className='circuit';
+    circuit.innerHTML='<span class="bulb" id="l3bulb"></span><span class="pwr" id="l3pwr">indicator: low</span>';
+    bench.appendChild(circuit);
+    var mk=function(id,ic,txt){var b=document.createElement('button');b.className='act';b.id='l3'+id;b.innerHTML='<span class="ic">'+ic+'</span>'+txt;return b;};
+    var bPow=mk('pwrbtn','\u23FB','Power on / off');
+    var bConf=mk('confbtn','\u25C9','Check indicator');
+    var bFuse=mk('fusebtn','\u2756','Replace the fuse');
+    var bRead=mk('readbtn','\u2713','Check reading');
+    bPow.onclick=l3TogglePower; bConf.onclick=l3Confirm; bFuse.onclick=l3Fuse; bRead.onclick=l3Reading;
+    bench.appendChild(bPow); bench.appendChild(bConf); bench.appendChild(bFuse); bench.appendChild(bRead);
+    document.getElementById('l3hint').textContent='';
+  }
+}
+function l3mark(id){var e=document.getElementById('is-'+id); if(e) e.classList.add('istep-done');}
+function l3WarmClick(id, btn){
+  var st=l3_state;
+  if(id===st.order[st.step]){
+    btn.classList.add('done'); st.step++;
+    if(st.step>=st.order.length){ flash('good'); pop(document.getElementById('l3stage')); l3_done++; setTimeout(l3Round,480); }
+  } else {
+    shake(document.getElementById('l3stage'));
+    document.getElementById('l3hint').textContent='Do it in the order you were told.';
+  }
+}
+function l3TogglePower(){
+  var st=l3_state; st.powered=!st.powered;
+  var pwr=document.getElementById('l3pwr');
+  if(st.powered){ st.indicatorHigh=true; pwr.textContent='indicator: HIGH'; pwr.classList.add('on'); document.getElementById('l3bulb').classList.add('on'); l3mark('power'); }
+  else { pwr.textContent='indicator: low'; pwr.classList.remove('on'); document.getElementById('l3bulb').classList.remove('on'); }
+  document.getElementById('l3pwrbtn').innerHTML='<span class="ic">\u23FB</span>'+(st.powered?'Power on / off (ON)':'Power on / off');
+  // the fuse action is physically dangerous while powered
+  document.getElementById('l3fusebtn').classList.toggle('live', st.powered);
+}
+function l3Confirm(){
+  var st=l3_state;
+  if(!st.powered){ shake(document.getElementById('l3stage')); document.getElementById('l3hint').textContent='Nothing to confirm yet. Power is off.'; return; }
+  st.confirmed=true; l3mark('confirm'); pop(document.getElementById('l3bulb'));
+  document.getElementById('l3hint').textContent='Indicator confirmed high.';
+}
+function l3Fuse(){
+  var st=l3_state;
+  if(st.powered){
+    // Shock: replacing the fuse on a live bench. The instruction never said to power down first.
+    flash('red'); shake(document.getElementById('l3stage'));
+    document.getElementById('l3outcome').innerHTML='<div class="outcome"><div class="big bad">Zapped.</div><p>You replaced the fuse with the bench still live. Step 1 said power on; no step ever said power off.</p></div>';
+    setTimeout(function(){go('l3out');},820); return;
+  }
+  st.fuseReplaced=true; l3mark('fuse'); flash('good');
+  document.getElementById('l3outcome').innerHTML='<div class="outcome"><div class="big ok">Good instinct.</div><p>You cut the power before touching the fuse. Smart, but nothing in the instruction told you to. You protected yourself; the next person who just follows the steps will not.</p></div>';
+  setTimeout(function(){go('l3out');},820);
+}
+function l3Reading(){
+  document.getElementById('l3hint').textContent='Replace the fuse first.';
+  shake(document.getElementById('l3stage'));
+}
+</script>
+</body>
+</html>
